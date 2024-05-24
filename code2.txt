@@ -1,0 +1,97 @@
+import numpy as np 
+import pandas as pd
+import warnings
+warnings.simplefilter("ignore")
+import seaborn as sns
+import matplotlib.pyplot as plt
+plt.style.use('ggplot')
+%matplotlib inline
+dataset = pd.read_csv(r'C:\Users\Tanishq Gupta\Desktop\mushrooms.csv')
+X=dataset.drop('class',axis=1) #Predictors
+y=dataset['class'] #Response
+X.head()
+from sklearn.preprocessing import LabelEncoder
+Encoder_X = LabelEncoder() 
+for col in X.columns:
+    X[col] = Encoder_X.fit_transform(X[col])
+Encoder_y=LabelEncoder()
+y = Encoder_y.fit_transform(y)
+from sklearn.model_selection import train_test_split
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+from sklearn.preprocessing import StandardScaler
+sc = StandardScaler()
+
+X_train = sc.fit_transform(X_train)
+X_test = sc.transform(X_test)
+from sklearn.decomposition import PCA
+pca = PCA(n_components=2)
+
+X_train = pca.fit_transform(X_train)
+X_test = pca.transform(X_test)
+def visualization_train(model):
+    sns.set_context(context='paper',font_scale=2)
+    plt.figure(figsize=(16,9))
+    from matplotlib.colors import ListedColormap
+    X_set, y_set = X_train, y_train
+    X1, X2 = np.meshgrid(np.arange(start = X_set[:, 0].min() - 1, stop = X_set[:, 0].max() + 1, step = 0.01),
+                     np.arange(start = X_set[:, 1].min() - 1, stop = X_set[:, 1].max() + 1, step = 0.01))
+    plt.contourf(X1, X2, classifier.predict(np.array([X1.ravel(), X2.ravel()]).T).reshape(X1.shape),
+             alpha = 0.6, cmap = ListedColormap(('red', 'green')))
+    plt.xlim(X1.min(), X1.max())
+    plt.ylim(X2.min(), X2.max())
+    for i, j in enumerate(np.unique(y_set)):
+        plt.scatter(X_set[y_set == j, 0], X_set[y_set == j, 1],
+                    c = ListedColormap(('red', 'green'))(i), label = j)
+   
+
+
+def visualization_test(model):
+    sns.set_context(context='notebook',font_scale=2)
+    plt.figure(figsize=(16,9))
+    from matplotlib.colors import ListedColormap
+    X_set, y_set = X_test, y_test
+    X1, X2 = np.meshgrid(np.arange(start = X_set[:, 0].min() - 1, stop = X_set[:, 0].max() + 1, step = 0.01),
+                         np.arange(start = X_set[:, 1].min() - 1, stop = X_set[:, 1].max() + 1, step = 0.01))
+    plt.contourf(X1, X2, classifier.predict(np.array([X1.ravel(), X2.ravel()]).T).reshape(X1.shape),
+                 alpha = 0.6, cmap = ListedColormap(('red', 'green')))
+    plt.xlim(X1.min(), X1.max())
+    plt.ylim(X2.min(), X2.max())
+    for i, j in enumerate(np.unique(y_set)):
+        plt.scatter(X_set[y_set == j, 0], X_set[y_set == j, 1],
+                    c = ListedColormap(('red', 'green'))(i), label = j)
+    plt.title("%s Test Set" %(model))
+    plt.xlabel('PC 1')
+    plt.ylabel('PC 2')
+    plt.legend()
+from sklearn.linear_model import LogisticRegression
+classifier = LogisticRegression()
+
+classifier.fit(X_train,y_train)
+visualization_train('Logistic Reg')
+visualization_test('Logistic Reg')
+from sklearn.svm import SVC
+classifier = SVC(kernel='rbf',random_state=42)
+
+classifier.fit(X_train,y_train)
+visualization_test('SVC')
+from sklearn.neighbors import KNeighborsClassifier as KNN
+
+classifier = KNN()
+classifier.fit(X_train,y_train)
+visualization_train('K-NN')
+from sklearn.naive_bayes import GaussianNB as NB
+
+classifier = NB()
+classifier.fit(X_train,y_train)
+visualization_test('Naive Bayes')
+from sklearn.tree import DecisionTreeClassifier as DT
+
+classifier = DT(criterion='entropy',random_state=42)
+classifier.fit(X_train,y_train)
+visualization_test('Decision Tree')
+from sklearn.ensemble import RandomForestClassifier
+classifier = RandomForestClassifier(n_estimators = 50, criterion = 'entropy', random_state = 42)
+classifier.fit(X_train, y_train)
+visualization_test('Random Forest')
+
+

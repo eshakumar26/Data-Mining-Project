@@ -1,0 +1,84 @@
+import numpy as np 
+import pandas as pd
+import warnings
+warnings.simplefilter("ignore")
+import seaborn as sns
+import matplotlib.pyplot as plt
+plt.style.use('ggplot')
+%matplotlib inline
+dataset = pd.read_csv(r'C:\Users\Tanishq Gupta\Desktop\mushrooms.csv')
+X=dataset.drop('class',axis=1) #Predictors
+y=dataset['class'] #Response
+X.head()
+from sklearn.preprocessing import LabelEncoder
+Encoder_X = LabelEncoder() 
+for col in X.columns:
+    X[col] = Encoder_X.fit_transform(X[col])
+Encoder_y=LabelEncoder()
+y = Encoder_y.fit_transform(y)
+X
+from sklearn.model_selection import train_test_split
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.7, random_state=42)
+from sklearn.preprocessing import StandardScaler
+sc = StandardScaler()
+
+X_train = sc.fit_transform(X_train)
+X_test = sc.transform(X_test)
+X_test
+from sklearn.decomposition import PCA
+pca = PCA(n_components=15)
+
+X_train = pca.fit_transform(X_train)
+X_test = pca.transform(X_test)
+from sklearn.model_selection import cross_val_predict, cross_val_score
+from sklearn.metrics import confusion_matrix,classification_report,accuracy_score
+def print_score(classifier,X_train,y_train,X_test,y_test,train=True):
+    if train == True:
+        print("Training results:\n")
+        print('Accuracy Score: {0:.4f}\n'.format(accuracy_score(y_train,classifier.predict(X_train))))
+        print('Classification Report:\n{}\n'.format(classification_report(y_train,classifier.predict(X_train))))
+        print('Confusion Matrix:\n{}\n'.format(confusion_matrix(y_train,classifier.predict(X_train))))
+        res = cross_val_score(classifier, X_train, y_train, cv=10, n_jobs=-1, scoring='accuracy')
+        print('Average Accuracy:\t{0:.4f}\n'.format(res.mean()))
+        print('Standard Deviation:\t{0:.4f}'.format(res.std()))
+    elif train == False:
+        print("Test results:\n")
+        print('Accuracy Score: {0:.4f}\n'.format(accuracy_score(y_test,classifier.predict(X_test))))
+        print('Classification Report:\n{}\n'.format(classification_report(y_test,classifier.predict(X_test))))
+        print('Confusion Matrix:\n{}\n'.format(confusion_matrix(y_test,classifier.predict(X_test))))
+from sklearn.linear_model import LogisticRegression
+classifier = LogisticRegression()
+
+classifier.fit(X_train,y_train)
+print_score(classifier,X_train,y_train,X_test,y_test,train=True)
+print_score(classifier,X_train,y_train,X_test,y_test,train=False)
+from sklearn.svm import SVC
+classifier = SVC(kernel='rbf',random_state=42)
+
+classifier.fit(X_train,y_train)
+print_score(classifier,X_train,y_train,X_test,y_test,train=True)
+print_score(classifier,X_train,y_train,X_test,y_test,train=False)
+from sklearn.neighbors import KNeighborsClassifier as KNN
+
+classifier = KNN()
+classifier.fit(X_train,y_train)
+print_score(classifier,X_train,y_train,X_test,y_test,train=True)
+print_score(classifier,X_train,y_train,X_test,y_test,train=False)
+from sklearn.naive_bayes import GaussianNB as NB
+
+classifier = NB()
+classifier.fit(X_train,y_train)
+print_score(classifier,X_train,y_train,X_test,y_test,train=True)
+print_score(classifier,X_train,y_train,X_test,y_test,train=False)
+from sklearn.tree import DecisionTreeClassifier as DT
+
+classifier = DT(criterion='entropy',random_state=42)
+classifier.fit(X_train,y_train)
+print_score(classifier,X_train,y_train,X_test,y_test,train=True)
+print_score(classifier,X_train,y_train,X_test,y_test,train=False)
+from sklearn.ensemble import RandomForestClassifier
+classifier = RandomForestClassifier(n_estimators = 50, criterion = 'entropy', random_state = 42)
+classifier.fit(X_train, y_train)
+print_score(classifier,X_train,y_train,X_test,y_test,train=True)
+print_score(classifier,X_train,y_train,X_test,y_test,train=False)
+
